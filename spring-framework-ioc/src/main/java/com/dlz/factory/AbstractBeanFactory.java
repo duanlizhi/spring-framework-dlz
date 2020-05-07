@@ -15,6 +15,7 @@ public abstract class AbstractBeanFactory implements BeanFactory {
      * @author lizhi
      * @date 2020/4/28 9:09 下午
      */
+    @Override
     public Object getBean(String beanName) {
         return null;
     }
@@ -27,6 +28,7 @@ public abstract class AbstractBeanFactory implements BeanFactory {
      * @author lizhi
      * @date 2020/4/28 9:14 下午
      */
+    @Override
     public Object getBean(Class<?> clazz) {
         return null;
     }
