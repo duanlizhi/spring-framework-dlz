@@ -99,4 +99,13 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory {
 
     private static void registerResource(ClassPathResource classPathResource) {
     }
+
+    /**
+     * 注册beanDefinition对象
+     * @param beanName
+     * @param beanDefinition
+     */
+    public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
+        beanDefinitions.put(beanName, beanDefinition);
+    }
 }
