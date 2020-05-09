@@ -1,6 +1,7 @@
 package com.dlz.config;
 
 import com.dlz.factory.DefaultListableBeanFactory;
+import com.dlz.utils.ReflectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Attribute;
 import org.dom4j.Element;
@@ -10,6 +11,7 @@ import java.util.Objects;
 
 /**
  * 解析document文档信息
+ *
  * @author dlz
  */
 public class XmlBeanDefinitionDocumentParser {
@@ -61,11 +63,52 @@ public class XmlBeanDefinitionDocumentParser {
 
             BeanDefinition beanDefinition = new BeanDefinition(beanName, clazz);
             beanDefinition.setInitMethod(initMethod);
-            // todo 解析property标签
+            parserProperties(beanDefinition, element);
             defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinition);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 解析property标签
+     *
+     * @param beanDefinition
+     * @param element
+     */
+    private void parserProperties(BeanDefinition beanDefinition, Element element) {
+        // 获取子标签
+        List<Element> elements = element.elements();
+        elements.forEach(elementChild -> {
+            try {
+                PropertyValue propertyValue = null;
+                String childName = elementChild.getName();
+                if ("property".equals(childName)) {
+                    String name = elementChild.attributeValue("name");
+                    String value = elementChild.attributeValue("value");
+                    String ref = elementChild.attributeValue("ref");
+                    // 如果两个都有值，那么不设置
+                    if (StringUtils.isNoneBlank(value, ref)) {
+                        return;
+                    }
+                    if (StringUtils.isNotBlank(value)) {
+                        // spring的value是String类型，为基本属性，可以直接赋值
+                        TypeStringValue typeStringValue = new TypeStringValue(value);
+                        // 当前value属性属于当前bean对象的对应属性的类型
+                        Class<?> typeByFieldName = ReflectUtils.getTypeByFieldName(beanDefinition.getBeanClassName(), name);
+
+                        typeStringValue.setClassType(typeByFieldName);
+                        propertyValue = new PropertyValue(name, typeStringValue);
+                    } else if (StringUtils.isNotBlank(ref)) {
+                        RuntimeBeanReference runtimeBeanReference = new RuntimeBeanReference(ref);
+                        propertyValue = new PropertyValue(name, runtimeBeanReference);
+                    }
+                    beanDefinition.addPropertyValue(propertyValue);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void parserCustomDefinition(Element element) {
