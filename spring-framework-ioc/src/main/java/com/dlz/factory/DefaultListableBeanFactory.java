@@ -97,6 +97,7 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory {
         setProperty(instance, propertyValues);
         // 执行初始化方法
         ReflectUtils.invokeInitMethod(instance, beanDefinition.getInitMethod());
+        addSingletonBean(beanName, instance);
 
         return instance;
     }
@@ -162,5 +163,18 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory {
      */
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
         beanDefinitions.put(beanName, beanDefinition);
+    }
+
+    /**
+     * 将单例bean存入缓存
+     *
+     * @param beanName
+     * @param object
+     * @return void
+     * @author dlz
+     * @date 2020/5/10 15:29
+     */
+    public void addSingletonBean(String beanName, Object object) {
+        this.singleBeans.put(beanName, object);
     }
 }
